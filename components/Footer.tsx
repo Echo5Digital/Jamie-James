@@ -1,261 +1,206 @@
+import Image from "next/image";
 import Link from "next/link";
-import { Linkedin, Twitter, Mail } from "lucide-react";
+import {
+  ArrowUp,
+  ExternalLink,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Mail,
+  Youtube,
+  type LucideIcon,
+} from "lucide-react";
+import Reveal from "@/components/Reveal";
+import { OPEN_ARMS, PHOTOS, SITE, SOCIAL_LINKS, type SocialId } from "@/lib/site";
 
-interface FooterLink {
-  label: string;
-  route: string;
-}
+const SOCIAL_ICONS: Record<SocialId, LucideIcon> = {
+  linkedin: Linkedin,
+  facebook: Facebook,
+  instagram: Instagram,
+  youtube: Youtube,
+};
 
-interface FooterProps {
-  businessName?: string;
-  tagline?: string;
-  affiliations?: { label: string; route: string }[];
-  socialLinks?: {
-    linkedin?: string;
-    twitter?: string;
-    email?: string;
-  };
-  footerLinks?: FooterLink[];
-}
-
-const defaultFooterLinks: FooterLink[] = [
-  { label: "Home", route: "/" },
-  { label: "About Jamie", route: "/about-jamie" },
-  { label: "Speaking", route: "/speaking" },
-  { label: "Training", route: "/training" },
-  { label: "Leadership & Workplace Wellness", route: "/training/leadership-workplace-wellness" },
-  { label: "Consulting", route: "/consulting" },
-  { label: "Book Jamie", route: "/book" },
-  { label: "Privacy Policy", route: "/privacy" },
-  { label: "Terms of Use", route: "/terms" },
+const mainLinks = [
+  { label: "Home", href: "/" },
+  { label: "About Jamie", href: "/about-jamie" },
+  { label: "Book Jamie", href: "/book" },
 ];
 
-const defaultAffiliations = [
-  { label: "Open Arms Initiative", route: "https://www.openarmsinitiative.com" },
-  { label: "Open Arms Foster Care", route: "https://www.openarmsfostercare.com" },
-];
+const headingClass =
+  "mb-5 flex items-center gap-3 font-body text-[11px] font-semibold uppercase tracking-[0.25em] text-accent";
 
-export default function Footer({
-  businessName = "Jamie James",
-  tagline = "Speaker · Trainer · Consultant",
-  affiliations = defaultAffiliations,
-  socialLinks = {
-    linkedin: "#",
-    twitter: "#",
-    email: "mailto:hello@jamiejames.com",
-  },
-  footerLinks = defaultFooterLinks,
-}: FooterProps) {
-  const primaryLinks = footerLinks.filter(
-    (l) =>
-      !["Privacy Policy", "Terms of Use"].includes(l.label) &&
-      l.label !== "Leadership & Workplace Wellness"
-  );
-  const subLinks = footerLinks.filter((l) =>
-    ["Leadership & Workplace Wellness"].includes(l.label)
-  );
-  const legalLinks = footerLinks.filter((l) =>
-    ["Privacy Policy", "Terms of Use"].includes(l.label)
-  );
+const circleButton =
+  "flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-background/90 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent hover:bg-accent hover:text-primary";
 
+// Same look as the rest of the site: deep navy, a gold hairline and warm glow
+// (like the Themes section), the section container edges, and the same
+// staggered scroll-in.
+export default function Footer() {
   return (
-    <footer className="bg-primary text-background">
-      {/* CTA band */}
-      <div className="border-b border-secondary/40">
-        <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <p className="font-heading text-xl md:text-2xl text-background leading-snug">
-              Ready to Bring Jamie to Your Organization?
-            </p>
-            <p className="font-body text-sm text-background/70 mt-1">
-              Let's create meaningful change together.
-            </p>
+    <footer className="relative w-full overflow-hidden bg-primary text-background">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_12%_0%,rgba(196,154,98,0.13),transparent_55%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent"
+      />
+
+      {/* Side padding sits OUTSIDE the max-w-6xl box, exactly like <Section>, so the
+          footer's content lines up with the sections above it at every width. */}
+      <div className="relative px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mx-auto grid max-w-6xl gap-12 sm:grid-cols-2 lg:grid-cols-12 lg:gap-8">
+        {/* Brand */}
+        <Reveal className="sm:col-span-2 lg:col-span-5">
+          <div className="mb-5 flex items-center gap-4">
+            <span className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-full ring-2 ring-accent ring-offset-2 ring-offset-primary">
+              <Image
+                src={PHOTOS.portrait.src}
+                alt=""
+                fill
+                sizes="64px"
+                className="object-cover"
+                style={{ transform: "scale(1.2)", transformOrigin: "50% 38%" }}
+              />
+            </span>
+            <span>
+              <Link
+                href="/"
+                className="block font-heading text-3xl leading-none tracking-tight text-background transition-colors hover:text-accent"
+              >
+                {SITE.name}
+              </Link>
+              <span className="mt-2 block font-body text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
+                {SITE.tagline}
+              </span>
+            </span>
           </div>
-          <Link
-            href="/book"
-            className="inline-block bg-accent text-primary font-body text-xs font-semibold uppercase tracking-widest px-7 py-3 rounded-md shadow-md transition-opacity hover:opacity-90"
-          >
-            Request Availability →
-          </Link>
-        </div>
-      </div>
-
-      {/* Main footer body */}
-      <div className="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-        {/* Brand column */}
-        <div className="flex flex-col gap-4">
-          <Link href="/" className="font-heading text-2xl text-background tracking-tight">
-            {businessName}
-          </Link>
-          <p className="font-body text-sm text-background/70 leading-relaxed">
-            {tagline}
+          <p className="mb-6 max-w-sm font-body text-sm leading-relaxed text-background/80">
+            Speaking and training that strengthen people and organizations.
           </p>
-          <p className="font-body text-sm text-background/60 leading-relaxed">
-            Compassionate. Practical. Real-world strategies for healthier teams,
-            stronger leaders and more resilient communities.
-          </p>
-          {/* Social icons */}
-          <div className="flex items-center gap-4 mt-2">
-            {socialLinks?.linkedin && (
-              <a
-                href={socialLinks.linkedin}
-                aria-label="LinkedIn"
-                className="text-background/60 hover:text-accent transition-colors"
-              >
-                <Linkedin size={18} />
-              </a>
-            )}
-            {socialLinks?.twitter && (
-              <a
-                href={socialLinks.twitter}
-                aria-label="Twitter"
-                className="text-background/60 hover:text-accent transition-colors"
-              >
-                <Twitter size={18} />
-              </a>
-            )}
-            {socialLinks?.email && (
-              <a
-                href={socialLinks.email}
-                aria-label="Email Jamie"
-                className="text-background/60 hover:text-accent transition-colors"
-              >
-                <Mail size={18} />
-              </a>
-            )}
-          </div>
-        </div>
 
-        {/* Navigation column */}
-        <div className="flex flex-col gap-3">
-          <h4 className="font-heading text-sm uppercase tracking-widest text-accent mb-1">
-            Navigation
-          </h4>
-          {primaryLinks.map((link) => (
-            <Link
-              key={link.route}
-              href={link.route}
-              className="font-body text-sm text-background/75 hover:text-accent transition-colors"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
+          {SOCIAL_LINKS.length > 0 && (
+            <ul aria-label="Social media" className="mb-5 flex items-center gap-3">
+              {SOCIAL_LINKS.map((s) => {
+                const Icon = SOCIAL_ICONS[s.id];
+                return (
+                  <li key={s.id}>
+                    <a
+                      href={s.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${s.label} (opens in a new tab)`}
+                      className={circleButton}
+                    >
+                      <Icon size={17} strokeWidth={1.75} aria-hidden="true" />
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
 
-        {/* Training column */}
-        <div className="flex flex-col gap-3">
-          <h4 className="font-heading text-sm uppercase tracking-widest text-accent mb-1">
-            Training
-          </h4>
-          <Link
-            href="/training"
-            className="font-body text-sm text-background/75 hover:text-accent transition-colors"
-          >
-            All Training
-          </Link>
-          {subLinks.map((link) => (
-            <Link
-              key={link.route}
-              href={link.route}
-              className="font-body text-sm text-background/75 hover:text-accent transition-colors"
-            >
-              {link.label}
-            </Link>
-          ))}
-          <Link
-            href="/training/trauma-mental-health"
-            className="font-body text-sm text-background/75 hover:text-accent transition-colors"
-          >
-            Trauma &amp; Mental Health
-          </Link>
-          <Link
-            href="/training/foster-care-adoption"
-            className="font-body text-sm text-background/75 hover:text-accent transition-colors"
-          >
-            Foster Care, Adoption &amp; Child Welfare
-          </Link>
-          <Link
-            href="/training/parenting-family"
-            className="font-body text-sm text-background/75 hover:text-accent transition-colors"
-          >
-            Parenting &amp; Family
-          </Link>
-        </div>
-
-        {/* Affiliations + contact column */}
-        <div className="flex flex-col gap-3">
-          <h4 className="font-heading text-sm uppercase tracking-widest text-accent mb-1">
-            Affiliations
-          </h4>
-          {affiliations.map((a) => (
+          {SITE.contactEmail && (
             <a
-              key={a.route}
-              href={a.route}
-              className="font-body text-sm text-background/75 hover:text-accent transition-colors"
-              target="_blank"
-              rel="noopener noreferrer"
+              href={`mailto:${SITE.contactEmail}`}
+              className="inline-flex items-center gap-2 font-body text-sm text-background/85 transition-colors hover:text-accent"
             >
-              {a.label}
+              <Mail size={16} aria-hidden="true" />
+              {SITE.contactEmail}
             </a>
-          ))}
-          <div className="mt-4 pt-4 border-t border-secondary/30 flex flex-col gap-2">
-            <h4 className="font-heading text-sm uppercase tracking-widest text-accent">
-              Book Jamie
-            </h4>
-            <p className="font-body text-xs text-background/60 leading-relaxed">
-              Available for conferences, retreats, staff days, and faith &amp;
-              community events.
-            </p>
-            <Link
-              href="/book"
-              className="mt-1 self-start bg-accent text-primary font-body text-xs font-semibold uppercase tracking-widest px-5 py-2 rounded-md shadow transition-opacity hover:opacity-90"
-            >
-              Book Now
-            </Link>
-          </div>
-        </div>
+          )}
+        </Reveal>
+
+        {/* Navigation */}
+        <Reveal delay={120} className="lg:col-span-2 lg:col-start-7">
+          <nav aria-label="Footer">
+            <h2 className={headingClass}>
+              <span aria-hidden="true" className="h-4 w-0.5 bg-accent" />
+              Navigation
+            </h2>
+            <ul className="flex flex-col gap-3.5">
+              {mainLinks.map((l) => (
+                <li key={l.href}>
+                  <Link
+                    href={l.href}
+                    className="group inline-flex items-center gap-2.5 font-body text-sm text-background/85 transition-colors duration-200 hover:text-accent"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="h-px w-3 bg-accent/60 transition-all duration-300 group-hover:w-6 group-hover:bg-accent"
+                    />
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </Reveal>
+
+        {/* Open Arms */}
+        <Reveal delay={240} className="lg:col-span-4 lg:col-start-9">
+          <h2 className={headingClass}>
+            <span aria-hidden="true" className="h-4 w-0.5 bg-accent" />
+            Open Arms
+          </h2>
+          <p className="mb-4 font-body text-xs leading-relaxed text-background/75">
+            Jamie’s work stays connected to both organizations.
+          </p>
+          <ul className="flex flex-col gap-3">
+            {[OPEN_ARMS.initiative, OPEN_ARMS.fosterCare].map((o) => (
+              <li key={o.name}>
+                <a
+                  href={o.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="card-hover-dark group flex items-center justify-between gap-4 rounded-xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md"
+                >
+                  <span className="min-w-0">
+                    <span className="block font-heading text-lg font-semibold leading-snug text-background">
+                      {o.name}
+                      <span className="sr-only"> (opens in a new tab)</span>
+                    </span>
+                    <span className="mt-0.5 block font-body text-xs text-background/75">
+                      For {o.serves}
+                    </span>
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/30 text-background transition-all duration-300 group-hover:border-accent group-hover:bg-accent group-hover:text-primary"
+                  >
+                    <ExternalLink size={15} />
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </Reveal>
+      </div>
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-secondary/30">
-        <div className="max-w-6xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="font-body text-xs text-background/50">
-            © {new Date().getFullYear()} {businessName}. All rights reserved.
+      <div className="relative border-t border-white/10 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-5 py-6 sm:flex-row sm:justify-between">
+          <p className="font-body text-xs text-background/75">
+            © {new Date().getFullYear()} {SITE.name}. All rights reserved.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
-            {affiliations.map((a, i) => (
-              <span key={a.route} className="flex items-center gap-2">
-                {i > 0 && <span className="text-background/30 select-none">·</span>}
-                <a
-                  href={a.route}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-body text-xs text-background/50 hover:text-accent transition-colors"
-                >
-                  {a.label}
-                </a>
-              </span>
-            ))}
-            {legalLinks.map((link) => (
-              <span key={link.route} className="flex items-center gap-2">
-                <span className="text-background/30 select-none">·</span>
-                <Link
-                  href={link.route}
-                  className="font-body text-xs text-background/50 hover:text-accent transition-colors"
-                >
-                  {link.label}
-                </Link>
-              </span>
-            ))}
-            <span className="flex items-center gap-2">
-              <span className="text-background/30 select-none">·</span>
-              <Link
-                href="/book"
-                className="font-body text-xs text-background/50 hover:text-accent transition-colors"
-              >
-                Contact
-              </Link>
-            </span>
+          <div className="flex items-center gap-6">
+            <Link
+              href="/privacy"
+              className="font-body text-xs text-background/80 transition-colors hover:text-accent"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/terms"
+              className="font-body text-xs text-background/80 transition-colors hover:text-accent"
+            >
+              Terms of Use
+            </Link>
+            <a href="#main-content" aria-label="Back to top" className={circleButton}>
+              <ArrowUp size={16} aria-hidden="true" />
+            </a>
           </div>
         </div>
       </div>

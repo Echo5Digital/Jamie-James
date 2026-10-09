@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface ThemeListItemProps {
   icon: LucideIcon;
   title: string;
   description: string;
   requestHref: string;
+  faithIntegrated?: boolean;
 }
 
 export default function ThemeListItem({
@@ -13,26 +14,33 @@ export default function ThemeListItem({
   title,
   description,
   requestHref,
+  faithIntegrated = false,
 }: ThemeListItemProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-5 bg-background rounded-md border border-[#E0D6C8] shadow-sm hover:shadow-md transition-shadow duration-300 px-6 py-5">
-      <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-md bg-secondary/10 text-secondary">
-        <Icon size={22} strokeWidth={1.75} />
+    <li className="card-hover-sm flex list-none flex-col gap-5 rounded-md border border-[#E0D6C8] bg-background px-6 py-5 shadow-sm transition-shadow duration-300 hover:shadow-md sm:flex-row sm:items-center">
+      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-md bg-secondary/10 text-secondary">
+        <Icon size={22} strokeWidth={1.75} aria-hidden="true" />
       </div>
       <div className="flex-1">
-        <h3 className="font-heading text-primary text-lg font-semibold leading-snug mb-1">
+        <h3 className="mb-1 font-heading text-lg font-semibold leading-snug text-primary">
           {title}
+          {faithIntegrated && (
+            <span className="ml-2 inline-block rounded-full border border-accent-dark/40 px-2 py-0.5 align-middle font-body text-[10px] font-semibold uppercase tracking-widest text-accent-dark">
+              Faith-integrated
+            </span>
+          )}
         </h3>
-        <p className="font-body text-sm text-foreground/75 leading-relaxed">
+        <p className="font-body text-sm leading-relaxed text-foreground/75">
           {description}
         </p>
       </div>
       <Link
         href={requestHref}
-        className="flex-shrink-0 self-start sm:self-center inline-block bg-accent text-primary font-body font-semibold text-xs uppercase tracking-widest px-5 py-2.5 rounded-md shadow-md hover:brightness-95 active:scale-95 transition-all duration-200 whitespace-nowrap"
+        className="inline-block flex-shrink-0 self-start whitespace-nowrap rounded-md bg-accent px-5 py-2.5 font-body text-xs font-semibold uppercase tracking-widest text-primary shadow-md transition-all duration-200 hover:brightness-95 active:scale-95 sm:self-center"
       >
         Request This Training
+        <span className="sr-only"> — {title}</span>
       </Link>
-    </div>
+    </li>
   );
 }

@@ -1,141 +1,175 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { usePathname } from "next/navigation";
+import {
+  ChevronDown,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Menu,
+  X,
+  Youtube,
+  type LucideIcon,
+} from "lucide-react";
 
-interface NavLink {
+export interface NavLink {
   label: string;
-  route: string;
-  children?: NavLink[];
+  href: string;
+  children?: { label: string; href: string }[];
+}
+
+export interface SocialLink {
+  id: "linkedin" | "facebook" | "instagram" | "youtube";
+  label: string;
+  href: string;
 }
 
 interface HeaderProps {
-  businessName?: string;
-  navLinks?: NavLink[];
+  businessName: string;
+  navLinks: NavLink[];
+  socialLinks?: SocialLink[];
   ctaLabel?: string;
-  ctaRoute?: string;
-  avatarSrc?: string;
+  ctaHref?: string;
+  avatarSrc: string;
 }
 
-const defaultNavLinks: NavLink[] = [
-  { label: "Home", route: "/" },
-  { label: "About Jamie", route: "/about-jamie" },
-  { label: "Speaking", route: "/speaking" },
-  {
-    label: "Training",
-    route: "/training",
-    children: [
-      { label: "All Training", route: "/training" },
-      {
-        label: "Leadership & Workplace Wellness",
-        route: "/training/leadership-workplace-wellness",
-      },
-      { label: "Trauma & Mental Health", route: "/training/trauma-mental-health" },
-      {
-        label: "Foster Care, Adoption & Child Welfare",
-        route: "/training/foster-care-adoption",
-      },
-      { label: "Parenting & Family", route: "/training/parenting-family" },
-      {
-        label: "Schools & Youth Organizations",
-        route: "/training/schools-youth-organizations",
-      },
-      { label: "Faith & Ministry", route: "/training/faith-ministry" },
-      {
-        label: "Community & Personal Development",
-        route: "/training/community-personal-development",
-      },
-      { label: "Clinical Training", route: "/training/clinical-training" },
-    ],
-  },
-  { label: "Consulting", route: "/consulting" },
-];
+const SOCIAL_ICONS: Record<SocialLink["id"], LucideIcon> = {
+  linkedin: Linkedin,
+  facebook: Facebook,
+  instagram: Instagram,
+  youtube: Youtube,
+};
+
+const linkBase =
+  "font-body text-sm font-medium tracking-wide transition-colors duration-200 whitespace-nowrap hover:text-primary";
 
 export default function Header({
-  businessName = "Jamie James",
-  navLinks = defaultNavLinks,
+  businessName,
+  navLinks,
+  socialLinks = [],
   ctaLabel = "Book Jamie",
-  ctaRoute = "/book",
-  avatarSrc = "/images/jamie-james.jpg",
+  ctaHref = "/book",
+  avatarSrc,
 }: HeaderProps) {
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
+  const linkColor = (href: string) =>
+    isActive(href)
+      ? "text-primary underline underline-offset-8 decoration-accent decoration-2"
+      : "text-foreground/75";
+
+  const socialIcons = (className: string, itemClass: string) => (
+    <ul aria-label="Social media" className={className}>
+      {socialLinks.map((s) => {
+        const Icon = SOCIAL_ICONS[s.id];
+        return (
+          <li key={s.id}>
+            <a
+              href={s.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${s.label} (opens in a new tab)`}
+              className={itemClass}
+            >
+              <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  );
 
   return (
-    <header className="w-full bg-primary relative z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-8">
-        <div
-          className="relative [--avatar-d:5.5rem] [--pill-h:3.5rem] md:[--avatar-d:6.5rem] md:[--pill-h:4.25rem]"
-          style={{ height: "var(--avatar-d)" }}
-        >
-          {/* White pill nav bar, bottom-aligned so the avatar pokes up above it */}
-          <div
-            className="absolute bottom-0 bg-white rounded-full shadow-md flex items-center justify-between pr-4 md:pr-6"
-            style={{
-              left: "calc(var(--avatar-d) / 2)",
-              right: 0,
-              height: "var(--pill-h)",
-              paddingLeft: "calc(var(--avatar-d) / 2 + 0.75rem)",
-            }}
-          >
-            {/* Concave notch: a patch the size of the avatar's radius,
-                colored like the page background, masked with a radial
-                gradient centered on the avatar's own center (the pill's
-                top-left corner) so the circle's curve is cut out of the
-                pill, letting it hug the bottom of the avatar. */}
-            <div
-              className="absolute bg-primary pointer-events-none"
-              style={{
-                left: 0,
-                top: 0,
-                width: "calc(var(--avatar-d) / 2)",
-                height: "calc(var(--avatar-d) / 2)",
-                maskImage:
-                  "radial-gradient(circle at 0 0, transparent calc(var(--avatar-d) / 2), black calc(var(--avatar-d) / 2))",
-                WebkitMaskImage:
-                  "radial-gradient(circle at 0 0, transparent calc(var(--avatar-d) / 2), black calc(var(--avatar-d) / 2))",
-              }}
-            />
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center justify-center flex-1 gap-8 lg:gap-10">
+    <header className="relative z-50 w-full bg-primary">
+      <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 md:pb-8 md:pt-8 lg:px-8">
+        {/* Phones: just the hamburger on the navy background.
+            Tablet and up: the white pill with the photo poking above it. */}
+        <div className="relative h-12 md:h-[var(--avatar-d)] md:[--avatar-d:6.5rem] md:[--pill-h:4.25rem]">
+          <div className="flex h-full items-center justify-end md:absolute md:bottom-0 md:left-[calc(var(--avatar-d)/2)] md:right-0 md:h-[var(--pill-h)] md:justify-between md:rounded-full md:bg-white md:pl-[calc(var(--avatar-d)/2_+_0.75rem)] md:pr-6 md:shadow-md">
+            {/* Desktop navigation */}
+            <nav
+              aria-label="Main"
+              className="hidden flex-1 items-center justify-center gap-6 md:flex lg:gap-9"
+            >
               {navLinks.map((link) =>
                 link.children ? (
                   <div
-                    key={link.route}
+                    key={link.href}
                     className="relative"
-                    onMouseEnter={() => setDropdownOpen(true)}
-                    onMouseLeave={() => setDropdownOpen(false)}
+                    onMouseEnter={() => setMenuOpen(true)}
+                    onMouseLeave={() => setMenuOpen(false)}
+                    onFocus={() => setMenuOpen(true)}
+                    onBlur={(e) => {
+                      if (!e.currentTarget.contains(e.relatedTarget as Node | null))
+                        setMenuOpen(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape" && menuOpen) {
+                        setMenuOpen(false);
+                        toggleRef.current?.focus();
+                      }
+                    }}
                   >
-                    <Link
-                      href={link.route}
-                      className="flex items-center gap-1 font-body text-sm font-medium text-foreground/70 hover:text-primary tracking-wide transition-colors duration-200 whitespace-nowrap"
-                    >
-                      {link.label}
-                      <ChevronDown size={14} strokeWidth={2} />
-                    </Link>
-                    {dropdownOpen && (
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-72">
-                        <div className="bg-white rounded-md shadow-xl border border-[#E0D6C8] overflow-hidden py-2">
+                    <div className="flex items-center gap-1">
+                      <Link
+                        href={link.href}
+                        aria-current={pathname === link.href ? "page" : undefined}
+                        className={`${linkBase} ${linkColor(link.href)}`}
+                      >
+                        {link.label}
+                      </Link>
+                      <button
+                        ref={toggleRef}
+                        type="button"
+                        aria-expanded={menuOpen}
+                        aria-controls="training-menu"
+                        aria-label={`${link.label} categories`}
+                        onClick={() => setMenuOpen((o) => !o)}
+                        className="rounded p-1 text-foreground/75 hover:text-primary"
+                      >
+                        <ChevronDown
+                          size={14}
+                          strokeWidth={2}
+                          aria-hidden="true"
+                          className={`transition-transform duration-200 ${menuOpen ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                    </div>
+                    {menuOpen && (
+                      <div className="absolute left-1/2 top-full w-72 -translate-x-1/2 pt-3">
+                        <ul
+                          id="training-menu"
+                          className="overflow-hidden rounded-md border border-[#E0D6C8] bg-white py-2 shadow-xl"
+                        >
                           {link.children.map((child) => (
-                            <Link
-                              key={child.route}
-                              href={child.route}
-                              className="block px-4 py-2.5 font-body text-sm text-foreground/80 hover:bg-mint hover:text-primary transition-colors duration-150"
-                            >
-                              {child.label}
-                            </Link>
+                            <li key={child.href}>
+                              <Link
+                                href={child.href}
+                                aria-current={pathname === child.href ? "page" : undefined}
+                                className="block px-4 py-2.5 font-body text-sm text-foreground/85 transition-colors duration-150 hover:bg-mint hover:text-primary"
+                              >
+                                {child.label}
+                              </Link>
+                            </li>
                           ))}
-                        </div>
+                        </ul>
                       </div>
                     )}
                   </div>
                 ) : (
                   <Link
-                    key={link.route}
-                    href={link.route}
-                    className="font-body text-sm font-medium text-foreground/70 hover:text-primary tracking-wide transition-colors duration-200 whitespace-nowrap"
+                    key={link.href}
+                    href={link.href}
+                    aria-current={pathname === link.href ? "page" : undefined}
+                    className={`${linkBase} ${linkColor(link.href)}`}
                   >
                     {link.label}
                   </Link>
@@ -143,91 +177,108 @@ export default function Header({
               )}
             </nav>
 
+            {/* Social icons: inside the pill on wide screens (tablets get them in the footer) */}
+            {socialLinks.length > 0 &&
+              socialIcons(
+                "mr-4 hidden flex-shrink-0 items-center gap-0.5 border-l border-[#E0D6C8] pl-4 lg:flex",
+                "flex h-8 w-8 items-center justify-center rounded-full text-foreground/70 transition-colors duration-200 hover:bg-mint hover:text-secondary"
+              )}
+
             {/* Desktop CTA */}
-            <div className="hidden md:block flex-shrink-0">
+            <div className="hidden flex-shrink-0 md:block">
               <Link
-                href={ctaRoute}
-                className="inline-block bg-accent text-primary font-body font-semibold text-xs uppercase tracking-widest px-5 py-2.5 rounded-full shadow-sm hover:brightness-105 transition-all duration-200"
+                href={ctaHref}
+                className="inline-block rounded-full bg-accent px-5 py-2.5 font-body text-xs font-semibold uppercase tracking-widest text-primary shadow-sm transition-all duration-200 hover:brightness-105"
               >
                 {ctaLabel}
               </Link>
             </div>
 
-            {/* Mobile Menu Toggle */}
+            {/* Mobile menu toggle */}
             <button
-              className="md:hidden ml-auto text-primary focus:outline-none focus:ring-2 focus:ring-accent rounded-md p-1"
+              type="button"
+              className="ml-auto rounded-md p-2 text-white transition-colors duration-200 hover:bg-white/10 md:hidden"
               onClick={() => setMobileOpen((prev) => !prev)}
-              aria-label="Toggle mobile menu"
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileOpen}
+              aria-controls="mobile-menu"
             >
               {mobileOpen ? (
-                <X className="w-6 h-6" />
+                <X className="h-7 w-7" aria-hidden="true" />
               ) : (
-                <Menu className="w-6 h-6" />
+                <Menu className="h-7 w-7" aria-hidden="true" />
               )}
             </button>
           </div>
 
-          {/* Avatar, placed last so it sits above both the notch and the pill */}
+          {/* Photo, placed last so it sits above the pill. Its navy ring cuts a
+              concentric bite out of the pill's left end. */}
           <Link
             href="/"
-            aria-label={businessName}
-            className="absolute left-0 top-0 z-10 flex-shrink-0 rounded-full ring-4 ring-primary overflow-hidden bg-white"
-            style={{
-              width: "var(--avatar-d)",
-              height: "var(--avatar-d)",
-            }}
+            aria-label={`${businessName} — home`}
+            className="absolute left-0 top-0 z-10 hidden flex-shrink-0 overflow-hidden rounded-full bg-white ring-[6px] ring-primary md:block"
+            style={{ width: "var(--avatar-d)", height: "var(--avatar-d)" }}
           >
             <Image
               src={avatarSrc}
-              alt={businessName}
+              alt=""
               fill
-              sizes="96px"
-              className="object-cover"
+              sizes="104px"
               priority
+              className="object-cover"
+              style={{ transform: "scale(1.2)", transformOrigin: "50% 38%" }}
             />
           </Link>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-primary border-t border-white/10">
-          <nav className="flex flex-col px-4 py-4 gap-1">
+        <div id="mobile-menu" className="border-t border-white/10 bg-primary md:hidden">
+          <nav aria-label="Mobile" className="flex flex-col gap-1 px-4 py-4">
             {navLinks.map((link) => (
-              <div key={link.route}>
+              <div key={link.href}>
                 <Link
-                  href={link.route}
+                  href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="block font-body text-sm font-medium text-white/85 hover:text-white hover:bg-white/10 tracking-wide transition-colors duration-200 px-3 py-2.5 rounded-md"
+                  aria-current={pathname === link.href ? "page" : undefined}
+                  className="block rounded-md px-3 py-2.5 font-body text-sm font-medium tracking-wide text-white transition-colors duration-200 hover:bg-white/10"
                 >
                   {link.label}
                 </Link>
                 {link.children && (
-                  <div className="flex flex-col pl-4 border-l border-white/10 ml-3">
-                    {link.children.slice(1).map((child) => (
-                      <Link
-                        key={child.route}
-                        href={child.route}
-                        onClick={() => setMobileOpen(false)}
-                        className="font-body text-xs text-white/65 hover:text-white tracking-wide transition-colors duration-200 px-3 py-2 rounded-md"
-                      >
-                        {child.label}
-                      </Link>
-                    ))}
-                  </div>
+                  <ul className="ml-3 flex flex-col border-l border-white/20 pl-4">
+                    {link.children
+                      .filter((c) => c.href !== link.href)
+                      .map((child) => (
+                        <li key={child.href}>
+                          <Link
+                            href={child.href}
+                            onClick={() => setMobileOpen(false)}
+                            className="block rounded-md px-3 py-2 font-body text-xs tracking-wide text-white/80 transition-colors duration-200 hover:text-white"
+                          >
+                            {child.label}
+                          </Link>
+                        </li>
+                      ))}
+                  </ul>
                 )}
               </div>
             ))}
-            <div className="pt-3 pb-1">
+            <div className="pb-1 pt-3">
               <Link
-                href={ctaRoute}
+                href={ctaHref}
                 onClick={() => setMobileOpen(false)}
-                className="inline-block w-full text-center bg-accent text-primary font-body font-semibold text-xs uppercase tracking-widest px-5 py-3 rounded-md shadow-md hover:brightness-105 transition-all duration-200"
+                className="inline-block w-full rounded-md bg-accent px-5 py-3 text-center font-body text-xs font-semibold uppercase tracking-widest text-primary shadow-md transition-all duration-200 hover:brightness-105"
               >
                 {ctaLabel}
               </Link>
             </div>
+            {socialLinks.length > 0 &&
+              socialIcons(
+                "mt-3 flex items-center gap-1 border-t border-white/15 pt-4",
+                "flex h-9 w-9 items-center justify-center rounded-full text-white/85 transition-colors hover:bg-white/10 hover:text-accent"
+              )}
           </nav>
         </div>
       )}

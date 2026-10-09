@@ -1,6 +1,6 @@
 import React from "react";
 
-type SectionVariant = "default" | "alternate" | "primary" | "secondary" | "mint";
+type SectionVariant = "default" | "white" | "gold" | "alternate" | "primary" | "secondary" | "mint";
 
 interface SectionProps {
   children: React.ReactNode;
@@ -32,6 +32,9 @@ const maxWidthMap: Record<NonNullable<SectionProps["maxWidth"]>, string> = {
 
 const variantMap: Record<SectionVariant, string> = {
   default: "bg-background text-foreground",
+  white: "bg-white text-foreground",
+  // #C49A62. Use navy (text-primary) for text on it: 5.7:1. Teal and grey fall below 4.5:1.
+  gold: "bg-accent text-primary",
   alternate: "bg-[#EAE2D6] text-foreground",
   primary: "bg-primary text-background",
   secondary: "bg-secondary text-background",
